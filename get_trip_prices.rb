@@ -4,6 +4,7 @@ require 'yaml'
 require './Trip.rb'
 require './lib/extensions.rb'
 require './lib/modules/logger.rb'
+require './lib/modules/opts_validator.rb'
 
 require 'optparse'
 
@@ -19,11 +20,11 @@ p options
 options.freeze
 
 logger = CustomLogger::getLog(STDOUT, Logger::INFO)
-logger.error("You must provide a destination city code (-c flag)") and exit if options[:city].nil?
-logger.error("You must provide a duration in days for the trip (-d flag)") and exit if options[:duration_in_days].nil?
+options_validator = OptsValidator.new(options, logger)
+options_validator.validate_presence_of(:city, 'destination city code', 'c')
+options_validator.validate_presence_of(:duration_in_days, 'duration in days', 'd')
 logger.info("Destination city code: #{options[:city].upcase}")
 
-one_day  = 60 * 60 * 24
 margin   = 2
 from     = Time.utc(2016,10,6)
 end_date = Time.utc(2016,12,31)
@@ -31,8 +32,6 @@ to       = from + options[:duration_in_days]
 
 output = "results/output_#{Time.now.to_i}.csv"
 File.open(output, 'w') { |file| file.write('from day;from month;from year;to day;to month;to year;cost') }
-# from -= one_day
-# from = from.tomorrow
 from = from.yesterday
 while to <= end_date
     to   = from.addDays(options[:duration_in_days])
@@ -47,7 +46,7 @@ while to <= end_date
         price = trip.getLowestPrice.formatWithPoints
         puts trip
         File.open(output, 'a') {|file|
-            file.write "#{from.day};#{from.month};#{from.year};#{to_aux.day};#{to_aux.month};#{to_aux.year};" + price_output.to_s + "\n"
+            file.write "#{from.day};#{from.month};#{from.year};#{to_aux.day};#{to_aux.month};#{to_aux.year};" + price + "\n"
         }
     end
     puts
