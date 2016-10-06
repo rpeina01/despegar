@@ -42,6 +42,10 @@ File.open(output, 'w') { |file| file.write('from day;from month;from year;to day
 
 date_format = '%d %b'
 from = from.yesterday
+trip = Trip.new(options[:origin_city], options[:destination_city])
+trip.base_url = 'http://www.despegar.cl/shop/flights/data/search/roundtrip/'
+trip.debug = true if options[:debug]
+trip.setRanges(options['price_ranges'])
 while to <= end_date
     from = from.tomorrow
     to   = from.addDays(options[:duration_in_days])
@@ -49,11 +53,9 @@ while to <= end_date
     threads = []
     puts "From: ".blue + "#{to.strftime(date_format)}".light_blue
     (-margin..margin).each do | margin |
+        trip.start_date = from
+        trip.end_date = current_to
         current_to = to.addDays(margin)
-        trip = Trip.new(options[:origin_city], options[:destination_city], from, current_to)
-        trip.base_url = 'http://www.despegar.cl/shop/flights/data/search/roundtrip/'
-        trip.debug = true if options[:debug]
-        trip.setRanges(options['price_ranges'])
         json = trip.getData
         price = trip.getLowestPrice.formatWithPoints
         puts "\t- To ".blue + "#{current_to.strftime(date_format)}:".light_blue + " #{trip.getLowestPriceWithColor}"

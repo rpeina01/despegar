@@ -4,11 +4,9 @@ class Trip
     attr_accessor :base_url, :start_date, :end_date, :debug
     attr_reader :response
 
-    def initialize(origin_city = nil, destination_city = nil, start_date = nil, end_date = nil)
+    def initialize(origin_city = nil, destination_city = nil)
         @origin_city = origin_city
         @destination_city = destination_city
-        @start_date = start_date
-        @end_date = end_date
     end
 
     def details

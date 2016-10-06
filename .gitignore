@@ -1,5 +1,6 @@
 # Custom Gitignore:
 results
+Gemfile.lock
 
 # Gitignore from Github:
 
