@@ -1,22 +1,23 @@
 require 'colorize'
 
 class Trip
-    attr_accessor :base_url, :start_date, :end_date
+    attr_accessor :base_url, :start_date, :end_date, :debug
     attr_reader :response
 
-    def initialize(city_code = nil, start_date = nil, end_date = nil)
-        @city_code = city_code
+    def initialize(origin_city = nil, destination_city = nil, start_date = nil, end_date = nil)
+        @origin_city = origin_city
+        @destination_city = destination_city
         @start_date = start_date
         @end_date = end_date
-        @base_url = 'http://www.despegar.cl/shop/flights/data/search/roundtrip/scl/'
     end
 
     def details
-        "City code: #{@city_code} | from: #{@start_date} to #{@end_date}"
+        "City code: #{@origin_city} | from: #{@start_date} to #{@end_date}"
     end
 
     def getURL
-        "#{@base_url}#{@city_code}/#{@start_date.year}-#{@start_date.month}-#{@start_date.day}/#{@end_date.year}-#{@end_date.month}-#{@end_date.day}/1/0/0/TOTALFARE/ASCENDING/NA/NA/NA/NA/NA"
+        puts "You must provide a base_url" and exit if @base_url.nil?
+        "#{@base_url}#{@origin_city}/#{@destination_city}/#{@start_date.year}-#{@start_date.month}-#{@start_date.day}/#{@end_date.year}-#{@end_date.month}-#{@end_date.day}/1/0/0/TOTALFARE/ASCENDING/NA/NA/NA/NA/NA"
     end
 
     def getLowestPrice
@@ -24,8 +25,13 @@ class Trip
     end
 
     def getData
-        uri = URI(self.getURL)
-        response = Net::HTTP.get(uri)
+        if @debug
+            response = File.read('lib/answer_example.json')
+            sleep(0.5)
+        else
+            uri = URI(self.getURL)
+            response = Net::HTTP.get(uri)
+        end
         @response = JSON.parse(response)
     end
 
@@ -57,6 +63,6 @@ class Trip
 
     def to_s
         date_format = '%d %b'
-        "Trip to #{@city_code} from #{@start_date.strftime(date_format)} to #{@end_date.strftime(date_format)}: #{getLowestPriceWithColor}"
+        "Trip to #{@origin_city} from #{@start_date.strftime(date_format)} to #{@end_date.strftime(date_format)}: #{getLowestPriceWithColor}"
     end
 end

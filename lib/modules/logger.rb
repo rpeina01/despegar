@@ -10,6 +10,8 @@ module CustomLogger
                 "Error: ".red + "#{message.light_red}\n"
             when 'INFO'
                 "Info:  ".blue + "#{message.light_blue}\n"
+            when 'WARN'
+                "Warning:  ".yellow + "#{message.light_yellow}\n"
             else
                 "Severity #{severity} not coded"
             end
