@@ -1,7 +1,7 @@
 margin: 1
 price_ranges:
-    excessive: 600_000
-    expensive: 500_000
-    moderate: 450_000
-    moderate_to_cheap: 400_000
-    cheap: 300_000
+    excessive: 400_000
+    expensive: 300_000
+    moderate: 220_000
+    moderate_to_cheap: 180_000
+    cheap: 150_000

@@ -6,6 +6,7 @@ Crawler that obtains despegar.com lowest prices from multiple trip dates
 - [Description](https://github.com/giovannibenussi/despegar#description)
 - [Installation](https://github.com/giovannibenussi/despegar#installation)
 - [Basic Usage](https://github.com/giovannibenussi/despegar#basic-usage)
+- [Price ranges](https://github.com/giovannibenussi/despegar#price-ranges)
 - [Examples](https://github.com/giovannibenussi/despegar#examples)
 
 ## Description
@@ -31,6 +32,18 @@ Where:
 
 Optional:
 * Margin in arrival date. For example, if arrival date is in 14 days, then the script will get the prices from day 13 to 15 if margin equals 1.
+
+## Price ranges
+If you want override the default price ranges (used to colorize prices) you can edit the file `config.yml`:
+```yml
+margin: 1
+price_ranges:
+    excessive: 600_000
+    expensive: 500_000
+    moderate: 450_000
+    moderate_to_cheap: 400_000
+    cheap: 300_000
+```
 
 ## Examples:
 * Get prices from SCL to MIA for a 14 days trip:
