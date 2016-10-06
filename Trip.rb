@@ -1,7 +1,7 @@
 require 'colorize'
 
 class Trip
-    attr_accessor :base_url
+    attr_accessor :base_url, :start_date, :end_date
     attr_reader :response
 
     def initialize(city_code = nil, start_date = nil, end_date = nil)

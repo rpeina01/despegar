@@ -46,7 +46,7 @@ while to <= end_date
         price = trip.getLowestPrice.formatWithPoints
         puts trip
         File.open(output, 'a') {|file|
-            file.write "#{from.day};#{from.month};#{from.year};#{to_aux.day};#{to_aux.month};#{to_aux.year};" + price + "\n"
+            file.write "#{trip.start_date.day};#{trip.start_date.month};#{trip.start_date.year};#{trip.end_date.day};#{trip.end_date.month};#{trip.end_date.year};" + price + "\n"
         }
     end
     puts
