@@ -17,8 +17,8 @@ ruby get_trip_prices.rb -f FROM_CITY_CODE -t TO_CITY_CODE -d TRIP_DURATION_IN_DA
 ```
 
 Where:
-* FROM_CITY_CODE: <a href='https://github.com/giovannibenussi/despegar/blob/master/city_codes.md' target='_blank'>Short code</a> from origin city (e.g: SCL)
-* TO_CITY_CODE: <a href='https://github.com/giovannibenussi/despegar/blob/master/city_codes.md' target='_blank'>Short code</a> from destination city (e.g: MIA)
+* FROM_CITY_CODE: [Short code](https://github.com/giovannibenussi/despegar/blob/master/city_codes.md) from origin city (e.g: SCL)
+* TO_CITY_CODE: [Short code](https://github.com/giovannibenussi/despegar/blob/master/city_codes.md) from destination city (e.g: MIA)
 * TRIP_DURATION_IN_DAYS: Duración del viaje en días (e.g: 14)
 
 ## Examples:
