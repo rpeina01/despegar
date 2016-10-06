@@ -1,4 +1,4 @@
-duration_in_days: 14
+margin: 1
 price_ranges:
     excessive: 600_000
     expensive: 500_000

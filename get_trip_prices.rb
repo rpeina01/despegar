@@ -11,12 +11,12 @@ require 'optparse'
 response = FileUtils.mkdir_p('results')
 
 options = YAML.load_file('config.yml')
-puts options
 OptionParser.new do |opts|
   opts.banner = "Usage: despegar.rb [options]"
   opts.on("-f", "--origin-city origin-city", "origin city code") { |v| options[:origin_city] = v.to_s.upcase }
   opts.on("-t", "--destination-city destination-city", "Destination city code") { |v| options[:destination_city] = v.to_s.upcase }
   opts.on("-d", "--duration days", "Duration in days") { | v |  options[:duration_in_days] = v.to_i }
+  opts.on("-m", "--margin margin-in-days", "Margin in days") { | v |  options['margin'] = v.to_i }
   opts.on("--debug", "--debug", "Activate debug") { | v |  options[:debug] = true }
 end.parse!
 
@@ -32,7 +32,6 @@ logger.warn("Using debug mode") if options[:debug]
 logger.info("Origin city code: #{options[:origin_city].upcase}")
 logger.info("Destination city code: #{options[:destination_city].upcase}")
 
-margin   = 2
 from     = Time.utc(2016,10,6)
 end_date = Time.utc(2016,12,31)
 to       = from + options[:duration_in_days]
@@ -49,10 +48,8 @@ trip.setRanges(options['price_ranges'])
 while to <= end_date
     from = from.tomorrow
     to   = from.addDays(options[:duration_in_days])
-    to_aux = to.substractDays(margin)
-    threads = []
-    puts "From: ".blue + "#{to.strftime(date_format)}".light_blue
-    (-margin..margin).each do | margin |
+    puts "From: ".blue + "#{from.strftime(date_format)}".light_blue
+    (-options['margin']..options['margin']).each do | margin |
         current_to = to.addDays(margin)
         trip.start_date = from
         trip.end_date = current_to
