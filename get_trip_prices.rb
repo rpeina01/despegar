@@ -53,9 +53,9 @@ while to <= end_date
     threads = []
     puts "From: ".blue + "#{to.strftime(date_format)}".light_blue
     (-margin..margin).each do | margin |
+        current_to = to.addDays(margin)
         trip.start_date = from
         trip.end_date = current_to
-        current_to = to.addDays(margin)
         json = trip.getData
         price = trip.getLowestPrice.formatWithPoints
         puts "\t- To ".blue + "#{current_to.strftime(date_format)}:".light_blue + " #{trip.getLowestPriceWithColor}"
