@@ -37,7 +37,7 @@ from     = Time.utc(2016,10,6)
 end_date = Time.utc(2016,12,31)
 to       = from + options[:duration_in_days]
 
-output = "results/output_#{Time.now.to_i}.csv"
+output = "results/#{options[:origin_city]}_#{options[:destination_city]}_#{from.strftime('%d_%b_%Y')}_to_#{end_date.strftime('%d_%b_%Y')}_#{Time.now.to_i}.csv".downcase
 File.open(output, 'w') { |file| file.write('from day;from month;from year;to day;to month;to year;cost') }
 
 date_format = '%d %b'
