@@ -29,8 +29,20 @@ Where:
 * TO_CITY_CODE: [Short code](https://github.com/giovannibenussi/despegar/blob/master/city_codes.md) from destination city (e.g: MIA)
 * TRIP_DURATION_IN_DAYS: Duración del viaje en días (e.g: 14)
 
+Optional:
+* Margin in arrival date. For example, if arrival date is in 14 days, then the script will get the prices from day 13 to 15 if margin equals 1.
+
 ## Examples:
-Get prices from SCL to MIA for a 14 days trip
+* Get prices from SCL to MIA for a 14 days trip:
 ```ruby
 ruby get_trip_prices.rb -f scl -t mia -d 14
+```
+
+* Get prices from SCL to MIA for a trip between 13 and 15 days:
+```ruby
+ruby get_trip_prices.rb -f scl -t mia -d 14 -m 1
+```
+* Get prices from SCL to MIA for a trip between 12 and 16 days:
+```ruby
+ruby get_trip_prices.rb -f scl -t mia -d 14 -m 2
 ```
