@@ -30,11 +30,11 @@ File.open(output, 'w') { |file| file.write('from day;from month;from year;to day
 # from = from.tomorrow
 from = from.yesterday
 while to <= end_date
-    to   = from + options['duration_in_days'] * one_day
+    to   = from.addDays(options['duration_in_days'])
     from = from.tomorrow
     to_aux = to.substractDays(margin)
     threads = []
-    while to_aux <= (to+one_day*margin)
+    while to_aux <= to.addDays(margin)
         threads.push(Thread.new(to_aux){ |to_aux|
             trip = Trip.new('MIA', from, to_aux)
             trip.base_url = 'http://www.despegar.cl/shop/flights/data/search/roundtrip/scl/'
