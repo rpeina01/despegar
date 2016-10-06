@@ -1,12 +1,14 @@
-require 'net/http'
+require 'fileutils'
 require 'json'
+require 'net/http'
 require 'yaml'
 require './Trip.rb'
 require './lib/extensions.rb'
 require './lib/modules/logger.rb'
 require './lib/modules/opts_validator.rb'
-
 require 'optparse'
+
+response = FileUtils.mkdir_p('results')
 
 options = YAML.load_file('config.yml')
 puts options
@@ -24,6 +26,7 @@ options_validator = OptsValidator.new(options, logger)
 options_validator.validate_presence_of(:city, 'destination city code', 'c')
 options_validator.validate_presence_of(:duration_in_days, 'duration in days', 'd')
 logger.info("Destination city code: #{options[:city].upcase}")
+logger.info("Destination city code: #{options[:city].upcase}")
 
 margin   = 2
 from     = Time.utc(2016,10,6)
@@ -33,18 +36,21 @@ to       = from + options[:duration_in_days]
 output = "results/output_#{Time.now.to_i}.csv"
 File.open(output, 'w') { |file| file.write('from day;from month;from year;to day;to month;to year;cost') }
 from = from.yesterday
+date_format = '%d %b'
 while to <= end_date
     to   = from.addDays(options[:duration_in_days])
     from = from.tomorrow
     to_aux = to.substractDays(margin)
     threads = []
+    puts "From: ".blue + "#{to.strftime(date_format)}".light_blue
     (0..margin).each do | margin |
-        trip = Trip.new(options[:city], from, to.addDays(margin))
+        current_to = to.addDays(margin)
+        trip = Trip.new(options[:city], from, current_to)
         trip.base_url = 'http://www.despegar.cl/shop/flights/data/search/roundtrip/scl/'
         trip.setRanges(options['price_ranges'])
         json = trip.getData
         price = trip.getLowestPrice.formatWithPoints
-        puts trip
+        puts "\t- To ".blue + "#{current_to.strftime(date_format)}:".light_blue + " #{trip.getLowestPriceWithColor}"
         File.open(output, 'a') {|file|
             file.write "#{trip.start_date.day};#{trip.start_date.month};#{trip.start_date.year};#{trip.end_date.day};#{trip.end_date.month};#{trip.end_date.year};" + price + "\n"
         }

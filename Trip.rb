@@ -56,6 +56,7 @@ class Trip
     end
 
     def to_s
-        "#{@start_date.day}/#{@start_date.month} to #{@end_date.day}/#{@end_date.month}: #{getLowestPriceWithColor}"
+        date_format = '%d %b'
+        "Trip to #{@city_code} from #{@start_date.strftime(date_format)} to #{@end_date.strftime(date_format)}: #{getLowestPriceWithColor}"
     end
 end
