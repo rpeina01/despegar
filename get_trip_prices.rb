@@ -37,7 +37,7 @@ while to <= end_date
             trip = Trip.new('MIA', from, to_aux)
             trip.base_url = 'http://www.despegar.cl/shop/flights/data/search/roundtrip/scl/'
             json = trip.getData
-            price = json["result"]["data"]["items"].first["emissionPrice"]["total"]["fare"]["raw"]
+            price = trip.getLowestPrice
             price_output = price.formatWithPoints
 
             if price >= options['price_ranges']['excessive']

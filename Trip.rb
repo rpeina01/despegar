@@ -17,6 +17,10 @@ class Trip
         "#{@base_url}#{@city_code}/#{@start_date.year}-#{@start_date.month}-#{@start_date.day}/#{@end_date.year}-#{@end_date.month}-#{@end_date.day}/1/0/0/TOTALFARE/ASCENDING/NA/NA/NA/NA/NA"
     end
 
+    def getLowestPrice
+        @response["result"]["data"]["items"].first["emissionPrice"]["total"]["fare"]["raw"]
+    end
+
     def getData
         uri = URI(self.getURL)
         response = Net::HTTP.get(uri)
