@@ -26,11 +26,13 @@ to       = from + options['duration_in_days']
 
 output = "results/output_#{Time.now.to_i}.csv"
 File.open(output, 'w') { |file| file.write('from day;from month;from year;to day;to month;to year;cost') }
-from -= one_day
+# from -= one_day
+# from = from.tomorrow
+from = from.yesterday
 while to <= end_date
     to   = from + options['duration_in_days'] * one_day
-    from += one_day
-    to_aux = (to-one_day*margin)
+    from = from.tomorrow
+    to_aux = to.substractDays(margin)
     threads = []
     while to_aux <= (to+one_day*margin)
         threads.push(Thread.new(to_aux){ |to_aux|
@@ -61,7 +63,7 @@ while to <= end_date
             }
         })
 
-        to_aux += one_day
+        to_aux = to_aux.tomorrow
     end
     threads.each do | thread |
         thread.join
