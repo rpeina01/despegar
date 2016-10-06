@@ -1,3 +1,8 @@
+# Custom Gitignore:
+results
+
+# Gitignore from Github:
+
 *.gem
 *.rbc
 /.config
