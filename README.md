@@ -1,6 +1,14 @@
 # Despegar crawler
 
-Crawler that obtains despegar.com prices from multiple trip dates
+Crawler that obtains despegar.com lowest prices from multiple trip dates
+
+## Table of contents
+- [Description](https://github.com/giovannibenussi/despegar#description)
+- [Basic Usage](https://github.com/giovannibenussi/despegar#basic-usage)
+- [Examples](https://github.com/giovannibenussi/despegar#examples)
+
+## Description
+Script to obtain the lowest pricest from despegar.com website's. You can select any origin and destination city to trip and also a duration in days from your trip (including a margin from this).
 
 ## Basic Usage:
 
