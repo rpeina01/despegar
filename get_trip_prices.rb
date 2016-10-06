@@ -1,5 +1,4 @@
 require 'net/http'
-require 'colorize'
 require 'json'
 require 'yaml'
 require './Trip.rb'
@@ -34,39 +33,19 @@ while to <= end_date
     from = from.tomorrow
     to_aux = to.substractDays(margin)
     threads = []
-    while to_aux <= to.addDays(margin)
-        threads.push(Thread.new(to_aux){ |to_aux|
-            trip = Trip.new('MIA', from, to_aux)
-            trip.base_url = 'http://www.despegar.cl/shop/flights/data/search/roundtrip/scl/'
-            json = trip.getData
-            price = trip.getLowestPrice
-            price_output = price.formatWithPoints
+    (0..margin).each do | margin |
+        trip = Trip.new('MIA', from, to.addDays(margin))
+        trip.base_url = 'http://www.despegar.cl/shop/flights/data/search/roundtrip/scl/'
+        trip.setRanges(options['price_ranges'])
+        json = trip.getData
+        price = trip.getLowestPrice
+        price_output = price.formatWithPoints
 
-            if price >= options['price_ranges']['excessive']
-                price_output = price_output.red
-            elsif price >= options['price_ranges']['expensive']
-                price_output = price_output.light_red
-            elsif price >= options['price_ranges']['moderate']
-                price_output = price_output.yellow
-            elsif price >= options['price_ranges']['moderate_to_cheap']
-                price_output = price_output.light_yellow
-            elsif price >= options['price_ranges']['cheap']
-                price_output = price_output.green
-            else
-                price_output = price_output.light_green
-            end
+        puts trip
 
-            puts "#{from.day}/#{from.month} to #{to_aux.day}/#{to_aux.month}: #{price_output}"
-
-            File.open(output, 'a') {|file|
-                file.write "#{from.day};#{from.month};#{from.year};#{to_aux.day};#{to_aux.month};#{to_aux.year};" + json["result"]["data"]["items"].first["emissionPrice"]["total"]["fare"]["raw"].to_s + "\n"
-            }
-        })
-
-        to_aux = to_aux.tomorrow
-    end
-    threads.each do | thread |
-        thread.join
+        File.open(output, 'a') {|file|
+            file.write "#{from.day};#{from.month};#{from.year};#{to_aux.day};#{to_aux.month};#{to_aux.year};" + json["result"]["data"]["items"].first["emissionPrice"]["total"]["fare"]["raw"].to_s + "\n"
+        }
     end
     puts
 end

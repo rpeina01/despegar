@@ -1,3 +1,5 @@
+require 'colorize'
+
 class Trip
     attr_accessor :base_url
     attr_reader :response
@@ -9,7 +11,7 @@ class Trip
         @base_url = 'http://www.despegar.cl/shop/flights/data/search/roundtrip/scl/'
     end
 
-    def to_s
+    def details
         "City code: #{@city_code} | from: #{@start_date} to #{@end_date}"
     end
 
@@ -25,5 +27,35 @@ class Trip
         uri = URI(self.getURL)
         response = Net::HTTP.get(uri)
         @response = JSON.parse(response)
+    end
+
+    def setRanges(price_ranges)
+        @price_ranges = price_ranges
+    end
+
+    def getLowestPriceWithColor
+        lowest_price = getLowestPrice
+
+        return lowest_price.formatWithPoints if @price_ranges.nil?
+
+        price_output = lowest_price.formatWithPoints
+        if lowest_price >= @price_ranges['excessive']
+            price_output = price_output.red
+        elsif lowest_price >= @price_ranges['expensive']
+            price_output = price_output.light_red
+        elsif lowest_price >= @price_ranges['moderate']
+            price_output = price_output.yellow
+        elsif lowest_price >= @price_ranges['moderate_to_cheap']
+            price_output = price_output.light_yellow
+        elsif lowest_price >= @price_ranges['cheap']
+            price_output = price_output.green
+        else
+            price_output = price_output.light_green
+        end
+        price_output
+    end
+
+    def to_s
+        "#{@start_date.day}/#{@start_date.month} to #{@end_date.day}/#{@end_date.month}: #{getLowestPriceWithColor}"
     end
 end
