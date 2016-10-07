@@ -4,20 +4,20 @@ class Fixnum
     end
 end
 
-class Time
+class Date
     def tomorrow
-        self + 60 * 60 * 24
+        self + 1
     end
 
     def yesterday
-        self - 60 * 60 * 24
+        self - 1
     end
 
     def addDays(days)
-        self + days * 60 * 60 * 24
+        self + days
     end
     def substractDays(days)
-        self - days * 60 * 60 * 24
+        self - days
     end
 end
 

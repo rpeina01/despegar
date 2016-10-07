@@ -14,6 +14,8 @@ response = FileUtils.mkdir_p('results')
 options = YAML.load_file('config.yml')
 OptionParser.new do |opts|
   opts.banner = "Usage: despegar.rb [options]"
+  opts.on("-s", "--start-date start-date", "Start date") { |v| options[:start_date] = v.to_s }
+  opts.on("-e", "--end-date end-date", "End date") { |v| options[:end_date] = v.to_s }
   opts.on("-f", "--origin-city origin-city", "origin city code") { |v| options[:origin_city] = v.to_s.upcase }
   opts.on("-t", "--destination-city destination-city", "Destination city code") { |v| options[:destination_city] = v.to_s.upcase }
   opts.on("-d", "--duration days", "Duration in days") { | v |  options[:duration_in_days] = v.to_i }
@@ -32,20 +34,23 @@ options_validator = OptsValidator.new(options, logger)
 options_validator.validate_presence_of(:origin_city, 'destination city code', 'f')
 options_validator.validate_presence_of(:destination_city, 'destination city code', 't')
 options_validator.validate_presence_of(:duration_in_days, 'duration in days', 'd')
+options_validator.validate_presence_of(:start_date, 'start date', 's')
+options_validator.validate_presence_of(:end_date, 'end date', 'e')
 logger.warn("Using debug mode") if options[:debug]
 logger.info("Origin city code: #{options[:origin_city].upcase}")
 logger.info("Destination city code: #{options[:destination_city].upcase}")
 
-from     = Time.utc(2016,12,1)
-end_date = Time.utc(2016,12,31)
+start_date     = Date.parse(options[:start_date])
+end_date       = Date.parse(options[:end_date])
+# end_date = Time.utc(2016,12,31)
 # end_date = Time.utc(2017,03,15)
-to       = from + options[:duration_in_days]
+to       = start_date + options[:duration_in_days]
 
-output = "results/#{options[:origin_city]}_#{options[:destination_city]}_#{from.strftime('%d_%b_%Y')}_to_#{end_date.strftime('%d_%b_%Y')}_#{Time.now.to_i}.csv".downcase
+output = "results/#{options[:origin_city]}_#{options[:destination_city]}_#{start_date.strftime('%d_%b_%Y')}_to_#{end_date.strftime('%d_%b_%Y')}_#{Time.now.to_i}.csv".downcase
 File.open(output, 'w') { |file| file.write("From day;From month;From year;To day;To month;To year;Price\n") }
 
 date_format = '%d %b'
-from = from.yesterday
+end_date = end_date.yesterday
 threads = []
 results = {}
 displayResults = -> (from_str, from_data) {
@@ -59,16 +64,16 @@ displayResults = -> (from_str, from_data) {
 }
 all_results = {}
 progressbar = ProgressBar.create
-difference_in_days = (end_date - to).to_i / (24 * 60 * 60)
+difference_in_days = (end_date - to).to_i
 days_elapsed = 0
 while to <= end_date
     progressbar.progress = ((days_elapsed.to_f / difference_in_days.to_f) * 100).to_i
     days_elapsed += 1
-    from = from.tomorrow
-    to   = from.addDays(options[:duration_in_days])
+    start_date = start_date.tomorrow
+    to   = start_date.addDays(options[:duration_in_days])
     (-options['margin']..options['margin']).each do | margin |
         current_to = to.addDays(margin)
-        threads.push << Thread.new(from, current_to){ | from, to |
+        threads.push << Thread.new(start_date, current_to){ | from, to |
             trip = Trip.new(options[:origin_city], options[:destination_city])
             trip.base_url = 'http://www.despegar.cl/shop/flights/data/search/roundtrip/'
             trip.debug = true if options[:debug]
@@ -98,6 +103,8 @@ if not options[:hide_partial_output]
     results = results.sort_by { | to_str, price | to_str }
     results.each &displayResults
 end
+puts all_results.to_s
+puts all_results.to_s
 
 prices = all_results.map { | date_date, values | values.map { | from_date, price | price } }.flatten
 puts "Mean: #{prices.mean}"
@@ -112,14 +119,6 @@ ranges = {
 
 if options[:auto_colorize]
     puts "Colorize:"
-    # all_results.each { | date_from, values |
-    #     from = Date.parse(date_from)
-    #     values.each { | date_to, price |
-    #         to = Date.parse(date_to)
-    #         puts to.to_s
-    #         puts price
-    #     }
-    # }
     all_results = all_results.sort_by { | to_str, price | to_str }
     all_results.each { | from_str, from_data |
         my_from = Date.parse(from_str)
@@ -129,21 +128,6 @@ if options[:auto_colorize]
             my_current_to = Date.parse(to_str)
             print "\tto #{my_current_to.strftime(date_format)}: ".light_blue
             puts ColoredNumber.new(price, ranges).getLowestPriceWithColor
-            # puts price.to_s
-            #     puts ColoredNumber.new(number, ranges).getLowestPriceWithColor
         end
     }
 end
-
-
-
-# trip.setRanges(options['price_ranges'])
-
-# prices.each do | number |
-#     puts ColoredNumber.new(number, ranges).getLowestPriceWithColor
-# end
-
-# puts "\t- To ".blue + "#{current_to.strftime(date_format)}:".light_blue + " #{trip.getLowestPriceWithColor}"
-# File.open(output, 'a') {|file|
-#     file.write "#{trip.start_date.day};#{trip.start_date.month};#{trip.start_date.year};#{trip.end_date.day};#{trip.end_date.month};#{trip.end_date.year};" + price + "\n"
-# }
