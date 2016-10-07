@@ -1,4 +1,5 @@
 # Custom Gitignore:
+.DS_Store
 results
 Gemfile.lock
 

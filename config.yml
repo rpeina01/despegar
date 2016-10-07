@@ -1,7 +1,16 @@
 margin: 1
 price_ranges:
-    excessive: 400_000
-    expensive: 300_000
-    moderate: 220_000
-    moderate_to_cheap: 180_000
-    cheap: 150_000
+    excessive: 600000
+    expensive: 530000
+    moderate: 470000
+    moderate_to_cheap: 430000
+    cheap: 400000
+number_of_threads: 1
+# #  Punta Arenas
+# margin: 1
+# price_ranges:
+#     excessive: 200_000
+#     expensive: 150_000
+#     moderate: 110_000
+#     moderate_to_cheap: 90_000
+#     cheap: 80_000
