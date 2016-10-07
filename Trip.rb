@@ -1,5 +1,35 @@
 require 'colorize'
 
+class ColoredNumber
+
+    def initialize(number, price_ranges)
+        @number = number
+        @price_ranges = price_ranges
+    end
+
+    def getLowestPriceWithColor
+
+        # return lowest_price.formatWithPoints if @price_ranges.nil?
+
+        # output = lowest_price.formatWithPoints
+        output = @number.to_s
+        if @number >= @price_ranges[:excessive]
+            output = output.red
+        elsif @number >= @price_ranges[:expensive]
+            output = output.light_red
+        elsif @number >= @price_ranges[:moderate]
+            output = output.yellow
+        elsif @number >= @price_ranges[:moderate_to_cheap]
+            output = output.light_yellow
+        elsif @number >= @price_ranges[:cheap]
+            output = output.green
+        else
+            output = output.light_green
+        end
+        output
+    end
+end
+
 class Trip
     attr_accessor :base_url, :start_date, :end_date, :debug
     attr_reader :response
@@ -25,7 +55,7 @@ class Trip
     def getData
         if @debug
             response = File.read('lib/answer_example.json')
-            sleep(0.5)
+            # sleep(0.5)
         else
             uri = URI(self.getURL)
             response = Net::HTTP.get(uri)

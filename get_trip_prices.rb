@@ -7,6 +7,7 @@ require './lib/extensions.rb'
 require './lib/modules/logger.rb'
 require './lib/modules/opts_validator.rb'
 require 'optparse'
+require 'ruby-progressbar'
 
 response = FileUtils.mkdir_p('results')
 
@@ -19,6 +20,8 @@ OptionParser.new do |opts|
   opts.on("-m", "--margin margin-in-days", "Margin in days") { | v |  options['margin'] = v.to_i }
   opts.on("-n", "--threads number-of-threads", "Number of threads") { | v |  options['number_of_threads'] = v.to_i }
   opts.on("--debug", "--debug", "Activate debug") { | v |  options[:debug] = true }
+  opts.on("-a", "--auto-colorize", "Auto colorize prices") { | v |  options[:auto_colorize] = true }
+  opts.on("-u", "--hide-partial-output", "Hice partial output") { | v |  options[:hide_partial_output] = true }
 end.parse!
 
 p options
@@ -33,8 +36,9 @@ logger.warn("Using debug mode") if options[:debug]
 logger.info("Origin city code: #{options[:origin_city].upcase}")
 logger.info("Destination city code: #{options[:destination_city].upcase}")
 
-from     = Time.utc(2016,11,1)
-end_date = Time.utc(2017,03,15)
+from     = Time.utc(2016,12,1)
+end_date = Time.utc(2016,12,31)
+# end_date = Time.utc(2017,03,15)
 to       = from + options[:duration_in_days]
 
 output = "results/#{options[:origin_city]}_#{options[:destination_city]}_#{from.strftime('%d_%b_%Y')}_to_#{end_date.strftime('%d_%b_%Y')}_#{Time.now.to_i}.csv".downcase
@@ -53,7 +57,13 @@ displayResults = -> (from_str, from_data) {
         puts "\tto #{my_current_to.strftime(date_format)}: ".light_blue + price
     end
 }
+all_results = {}
+progressbar = ProgressBar.create
+difference_in_days = (end_date - to).to_i / (24 * 60 * 60)
+days_elapsed = 0
 while to <= end_date
+    progressbar.progress = ((days_elapsed.to_f / difference_in_days.to_f) * 100).to_i
+    days_elapsed += 1
     from = from.tomorrow
     to   = from.addDays(options[:duration_in_days])
     (-options['margin']..options['margin']).each do | margin |
@@ -68,20 +78,70 @@ while to <= end_date
             json = trip.getData
             price = trip.getLowestPrice.formatWithPoints
             results[ from.to_s ] ||= {}
-            results[ from.to_s ][ current_to.to_s ] = trip.getLowestPriceWithColor
+            all_results[ from.to_s ] ||= {}
+            results[ from.to_s ][ current_to.to_s ]     = trip.getLowestPriceWithColor
+            all_results[ from.to_s ][ current_to.to_s ] = trip.getLowestPrice
         }
     end
-    if threads.count >= options['number_of_threads']
-        threads.each { | thread |
-            thread.join
-        }
+    threads.each { | thread |
+        thread.join
+    }
+    if not options[:hide_partial_output] and threads.count >= options['number_of_threads']
+        results = results.sort_by { | to_str, price | to_str }
         results.each &displayResults
         threads = []
         results = {}
     end
 end
 threads.each { | thread | thread.join }
-results.each &displayResults
+if not options[:hide_partial_output]
+    results = results.sort_by { | to_str, price | to_str }
+    results.each &displayResults
+end
+
+prices = all_results.map { | date_date, values | values.map { | from_date, price | price } }.flatten
+puts "Mean: #{prices.mean}"
+
+ranges = {
+    excessive: percentile(prices, 0.90),
+    expensive: percentile(prices, 0.75),
+    moderate: percentile(prices, 0.50),
+    moderate_to_cheap: percentile(prices, 0.35),
+    cheap: percentile(prices, 0.25)
+}
+
+if options[:auto_colorize]
+    puts "Colorize:"
+    # all_results.each { | date_from, values |
+    #     from = Date.parse(date_from)
+    #     values.each { | date_to, price |
+    #         to = Date.parse(date_to)
+    #         puts to.to_s
+    #         puts price
+    #     }
+    # }
+    all_results = all_results.sort_by { | to_str, price | to_str }
+    all_results.each { | from_str, from_data |
+        my_from = Date.parse(from_str)
+        puts "From: ".blue + "#{my_from.strftime(date_format)}".light_blue
+        from_data = from_data.sort_by { | to_str, price | to_str }
+        from_data.each do | to_str, price |
+            my_current_to = Date.parse(to_str)
+            print "\tto #{my_current_to.strftime(date_format)}: ".light_blue
+            puts ColoredNumber.new(price, ranges).getLowestPriceWithColor
+            # puts price.to_s
+            #     puts ColoredNumber.new(number, ranges).getLowestPriceWithColor
+        end
+    }
+end
+
+
+
+# trip.setRanges(options['price_ranges'])
+
+# prices.each do | number |
+#     puts ColoredNumber.new(number, ranges).getLowestPriceWithColor
+# end
 
 # puts "\t- To ".blue + "#{current_to.strftime(date_format)}:".light_blue + " #{trip.getLowestPriceWithColor}"
 # File.open(output, 'a') {|file|
