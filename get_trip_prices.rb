@@ -33,8 +33,8 @@ logger.warn("Using debug mode") if options[:debug]
 logger.info("Origin city code: #{options[:origin_city].upcase}")
 logger.info("Destination city code: #{options[:destination_city].upcase}")
 
-from     = Time.utc(2016,12,31)
-end_date = Time.utc(2017,07,31)
+from     = Time.utc(2016,11,1)
+end_date = Time.utc(2017,03,15)
 to       = from + options[:duration_in_days]
 
 output = "results/#{options[:origin_city]}_#{options[:destination_city]}_#{from.strftime('%d_%b_%Y')}_to_#{end_date.strftime('%d_%b_%Y')}_#{Time.now.to_i}.csv".downcase
@@ -43,10 +43,19 @@ File.open(output, 'w') { |file| file.write("From day;From month;From year;To day
 date_format = '%d %b'
 from = from.yesterday
 threads = []
+results = {}
+displayResults = -> (from_str, from_data) {
+    my_from = Date.parse(from_str)
+    puts "From: ".blue + "#{my_from.strftime(date_format)}".light_blue
+    from_data = from_data.sort_by { | to_str, price | to_str }
+    from_data.each do | to_str, price |
+        my_current_to = Date.parse(to_str)
+        puts "\tto #{my_current_to.strftime(date_format)}: ".light_blue + price
+    end
+}
 while to <= end_date
     from = from.tomorrow
     to   = from.addDays(options[:duration_in_days])
-    puts "From: ".blue + "#{from.strftime(date_format)}".light_blue
     (-options['margin']..options['margin']).each do | margin |
         current_to = to.addDays(margin)
         threads.push << Thread.new(from, current_to){ | from, to |
@@ -58,15 +67,23 @@ while to <= end_date
             trip.end_date = current_to
             json = trip.getData
             price = trip.getLowestPrice.formatWithPoints
-            puts "\t- To ".blue + "#{current_to.strftime(date_format)}:".light_blue + " #{trip.getLowestPriceWithColor}"
-            File.open(output, 'a') {|file|
-                file.write "#{trip.start_date.day};#{trip.start_date.month};#{trip.start_date.year};#{trip.end_date.day};#{trip.end_date.month};#{trip.end_date.year};" + price + "\n"
-            }
+            results[ from.to_s ] ||= {}
+            results[ from.to_s ][ current_to.to_s ] = trip.getLowestPriceWithColor
         }
-        threads.each { | thread | thread.join } and threads = [] if threads.count == options['number_of_threads']
     end
-    threads.each { | thread | thread.join }
-    threads = []
-    puts
+    if threads.count >= options['number_of_threads']
+        threads.each { | thread |
+            thread.join
+        }
+        results.each &displayResults
+        threads = []
+        results = {}
+    end
 end
 threads.each { | thread | thread.join }
+results.each &displayResults
+
+# puts "\t- To ".blue + "#{current_to.strftime(date_format)}:".light_blue + " #{trip.getLowestPriceWithColor}"
+# File.open(output, 'a') {|file|
+#     file.write "#{trip.start_date.day};#{trip.start_date.month};#{trip.start_date.year};#{trip.end_date.day};#{trip.end_date.month};#{trip.end_date.year};" + price + "\n"
+# }

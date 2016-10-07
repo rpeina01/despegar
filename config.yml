@@ -14,3 +14,12 @@ number_of_threads: 1
 #     moderate: 110_000
 #     moderate_to_cheap: 90_000
 #     cheap: 80_000
+
+# #  Guayaquil
+# margin: 1
+# price_ranges:
+#     excessive: 400000
+#     expensive: 350000
+#     moderate: 300000
+#     moderate_to_cheap: 250000
+#     cheap: 200000
