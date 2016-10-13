@@ -109,7 +109,6 @@ puts all_results.to_s
 puts all_results.to_s
 
 prices = all_results.map { | date_date, values | values.map { | from_date, price | price } }.flatten
-puts "Mean: #{prices.mean}"
 
 ranges = {
     excessive: percentile(prices, 0.90),
@@ -124,3 +123,6 @@ if options[:auto_colorize]
     all_results = all_results.sort_by { | to_str, price | to_str }
     all_results.each &Formatters::formatEmail(date_format, ranges)
 end
+puts "Mean: #{prices.mean}"
+puts "Min: #{prices.min}"
+puts "Max: #{prices.max}"
