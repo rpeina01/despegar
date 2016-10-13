@@ -6,6 +6,7 @@ require './Trip.rb'
 require './lib/extensions.rb'
 require './lib/modules/logger.rb'
 require './lib/modules/opts_validator.rb'
+require './lib/modules/formatters.rb'
 require 'optparse'
 require 'ruby-progressbar'
 
@@ -120,14 +121,5 @@ ranges = {
 if options[:auto_colorize]
     puts "Colorize:"
     all_results = all_results.sort_by { | to_str, price | to_str }
-    all_results.each { | from_str, from_data |
-        my_from = Date.parse(from_str)
-        puts "From: ".blue + "#{my_from.strftime(date_format)}".light_blue
-        from_data = from_data.sort_by { | to_str, price | to_str }
-        from_data.each do | to_str, price |
-            my_current_to = Date.parse(to_str)
-            print "\tto #{my_current_to.strftime(date_format)}: ".light_blue
-            puts ColoredNumber.new(price, ranges).getLowestPriceWithColor
-        end
-    }
+    all_results.each &Formatters::formatEmail(date_format, ranges)
 end
