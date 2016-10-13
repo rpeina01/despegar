@@ -8,7 +8,7 @@ require './lib/modules/logger.rb'
 require './lib/modules/opts_validator.rb'
 require './lib/modules/formatters.rb'
 require 'optparse'
-require 'ruby-progressbar'
+# require 'ruby-progressbar'
 
 response = FileUtils.mkdir_p('results')
 
@@ -56,19 +56,20 @@ threads = []
 results = {}
 displayResults = -> (from_str, from_data) {
     my_from = Date.parse(from_str)
-    puts "From: ".blue + "#{my_from.strftime(date_format)}".light_blue
+    print "From: ".blue + "#{my_from.strftime(date_format)}".light_blue
     from_data = from_data.sort_by { | to_str, price | to_str }
     from_data.each do | to_str, price |
         my_current_to = Date.parse(to_str)
-        puts "\tto #{my_current_to.strftime(date_format)}: ".light_blue + price
+        print "|   #{my_current_to.strftime(date_format)}: ".light_blue + price
     end
+    puts
 }
 all_results = {}
-progressbar = ProgressBar.create
+# progressbar = ProgressBar.create
 difference_in_days = (end_date - to).to_i
 days_elapsed = 0
 while to <= end_date
-    progressbar.progress = ((days_elapsed.to_f / difference_in_days.to_f) * 100).to_i
+    # progressbar.progress = ((days_elapsed.to_f / difference_in_days.to_f) * 100).to_i
     days_elapsed += 1
     start_date = start_date.tomorrow
     to   = start_date.addDays(options[:duration_in_days])
