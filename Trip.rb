@@ -49,7 +49,7 @@ class Trip
     end
 
     def getLowestPrice
-        @response["result"]["data"]["items"].first["emissionPrice"]["total"]["fare"]["raw"]
+        @response["result"]["data"]["items"].first["emissionPrice"]["total"]["fare"]["amount"]
     end
 
     def getData
