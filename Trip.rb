@@ -60,7 +60,14 @@ class Trip
             uri = URI(self.getURL)
             response = Net::HTTP.get(uri)
         end
-        @response = JSON.parse(response)
+        begin 
+          @response = JSON.parse(response)
+        rescue JSON::ParserError => e
+          if  e.message =~ /^[0-9]+: unexpected token at ''$/
+            puts "Error, maybe you need to complete a captcha in #{getURL}" 
+            exit
+          end
+        end
     end
 
     def setRanges(price_ranges)
