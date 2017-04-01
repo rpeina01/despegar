@@ -1,6 +1,5 @@
 require 'colorize'
 require 'open-uri'
-require 'pry'
 
 class ColoredNumber
 
