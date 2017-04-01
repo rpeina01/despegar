@@ -1,4 +1,6 @@
 require 'colorize'
+require 'open-uri'
+require 'pry'
 
 class ColoredNumber
 
@@ -57,14 +59,13 @@ class Trip
             response = File.read('lib/answer_example.json')
             # sleep(0.5)
         else
-            uri = URI(self.getURL)
-            response = Net::HTTP.get(uri)
+            response = open(self.getURL).read
         end
-        begin 
+        begin
           @response = JSON.parse(response)
         rescue JSON::ParserError => e
           if  e.message =~ /^[0-9]+: unexpected token at ''$/
-            puts "Error, maybe you need to complete a captcha in #{getURL}" 
+            puts "Error, maybe you need to complete a captcha in #{getURL}"
             exit
           end
         end
